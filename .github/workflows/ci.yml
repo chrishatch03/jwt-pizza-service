@@ -70,5 +70,8 @@ jobs:
       - name: Update coverage
         run: |
           coverage=$(jq '.total.lines.pct' coverage/coverage-summary.json)
-          color=$(echo "$coverage < 80" | bc | awk '{if ($1) print "red"; else print "green"}')
-          curl -s -X POST "https://pizza-factory.cs329.click/api/badge/${{ secrets.NET_ID }}/jwtpizzaservicecoverage?label=Coverage&value=$coverage%25&color=$color" -H "authorization: bearer ${{ secrets.FACTORY_API_KEY }}"
+          # awk instead of bc: bc is not installed on the ubuntu-24.04 runner
+          color=$(awk -v c="$coverage" 'BEGIN{print (c < 80) ? "red" : "green"}')
+          echo "coverage=$coverage color=$color"
+          # -f makes a rejected request fail the step instead of passing silently
+          curl -sf -X POST "https://pizza-factory.cs329.click/api/badge/${{ secrets.NET_ID }}/jwtpizzaservicecoverage?label=Coverage&value=$coverage%25&color=$color" -H "authorization: bearer ${{ secrets.FACTORY_API_KEY }}"
