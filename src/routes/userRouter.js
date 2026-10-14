@@ -1,5 +1,5 @@
 const express = require('express');
-const { asyncHandler } = require('../endpointHelper.js');
+const { asyncHandler, StatusCodeError } = require('../endpointHelper.js');
 const { DB, Role } = require('../database/database.js');
 const { authRouter, setAuth } = require('./authRouter.js');
 
@@ -13,6 +13,22 @@ userRouter.docs = [
     description: 'Get authenticated user',
     example: `curl -X GET localhost:3000/api/user/me -H 'Authorization: Bearer tttttt'`,
     response: { id: 1, name: '常用名字', email: 'a@jwt.com', roles: [{ role: 'admin' }] },
+  },
+  {
+    method: 'GET',
+    path: '/api/user?page=0&limit=10&name=*',
+    requiresAuth: true,
+    description: 'Gets a list of users. Admin only.',
+    example: `curl -X GET 'localhost:3000/api/user?page=0&limit=10&name=*' -H 'Authorization: Bearer tttttt'`,
+    response: { users: [{ id: 1, name: '常用名字', email: 'a@jwt.com', roles: [{ role: 'admin' }] }], more: false },
+  },
+  {
+    method: 'DELETE',
+    path: '/api/user/:userId',
+    requiresAuth: true,
+    description: 'Deletes a user. Admin only.',
+    example: `curl -X DELETE localhost:3000/api/user/1 -H 'Authorization: Bearer tttttt'`,
+    response: { message: 'user deleted' },
   },
   {
     method: 'PUT',
@@ -56,7 +72,11 @@ userRouter.delete(
   '/:userId',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
-    res.json({ message: 'not implemented' });
+    if (!req.user.isRole(Role.Admin)) {
+      throw new StatusCodeError('unable to delete user', 403);
+    }
+    await DB.deleteUser(Number(req.params.userId));
+    res.json({ message: 'user deleted' });
   })
 );
 
@@ -65,7 +85,11 @@ userRouter.get(
   '/',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
-    res.json({ message: 'not implemented', users: [], more: false });
+    if (!req.user.isRole(Role.Admin)) {
+      throw new StatusCodeError('unable to list users', 403);
+    }
+    const [users, more] = await DB.getUsers(req.query.page, req.query.limit, req.query.name);
+    res.json({ users, more });
   })
 );
 
