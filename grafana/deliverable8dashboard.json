@@ -1143,8 +1143,8 @@
     ],
     "timeSettings": {
       "timezone": "browser",
-      "from": "now-1h",
-      "to": "now",
+      "from": "2026-10-30T18:50:00.000Z",
+      "to": "2026-10-30T19:10:00.000Z",
       "autoRefresh": "10s",
       "autoRefreshIntervals": [
         "5s",
