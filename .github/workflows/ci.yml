@@ -55,6 +55,12 @@ jobs:
               url: 'https://pizza-factory.cs329.click',
               apiKey: '${{ secrets.FACTORY_API_KEY }}',
             },
+            metrics: {
+              source: 'jwt-pizza-service',
+              endpointUrl: '${{ secrets.METRICS_ENDPOINT_URL }}',
+              accountId: '${{ secrets.METRICS_ACCOUNT_ID }}',
+              apiKey: '${{ secrets.METRICS_API_KEY }}',
+            },
           };" > src/config.js
 
       - name: Tests
@@ -73,6 +79,10 @@ jobs:
           cp Dockerfile dist
           cp -r src/* dist
           cp *.json dist
+          # This repo is public, so its workflow artifacts are publicly
+          # downloadable. config.js holds live secrets, so it never ships in
+          # the artifact - the deploy job writes the production one instead.
+          rm dist/config.js
 
       - name: Update distribution artifact
         uses: actions/upload-artifact@v4
@@ -105,9 +115,29 @@ jobs:
 
       - name: Write production config
         run: |
-          sed -i "s/root/${{ secrets.DB_USERNAME }}/g" config.js
-          sed -i "s/tempdbpassword/${{ secrets.DB_PASSWORD }}/g" config.js
-          sed -i "s/127.0.0.1/${{ secrets.DB_HOSTNAME }}/g" config.js
+          echo "module.exports = {
+            jwtSecret: '${{ secrets.JWT_SECRET }}',
+            db: {
+              connection: {
+                host: '${{ secrets.DB_HOSTNAME }}',
+                user: '${{ secrets.DB_USERNAME }}',
+                password: '${{ secrets.DB_PASSWORD }}',
+                database: 'pizza',
+                connectTimeout: 60000,
+              },
+              listPerPage: 10,
+            },
+            factory: {
+              url: 'https://pizza-factory.cs329.click',
+              apiKey: '${{ secrets.FACTORY_API_KEY }}',
+            },
+            metrics: {
+              source: 'jwt-pizza-service',
+              endpointUrl: '${{ secrets.METRICS_ENDPOINT_URL }}',
+              accountId: '${{ secrets.METRICS_ACCOUNT_ID }}',
+              apiKey: '${{ secrets.METRICS_API_KEY }}',
+            },
+          };" > config.js
 
       - name: Create OIDC token to AWS
         uses: aws-actions/configure-aws-credentials@v4
