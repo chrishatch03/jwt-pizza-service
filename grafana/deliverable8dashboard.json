@@ -5,8 +5,8 @@
     "name": "chmsjrb",
     "namespace": "stacks-1898425",
     "uid": "d24ff721-0972-49f4-bc19-bbf027a9b265",
-    "resourceVersion": "2116245986227511296",
-    "generation": 2,
+    "resourceVersion": "2116248828608757760",
+    "generation": 3,
     "creationTimestamp": "2026-10-30T19:06:12Z",
     "labels": {
       "grafana.app/deprecatedInternalID": "4057077180526592"
@@ -15,7 +15,7 @@
       "grafana.app/createdBy": "user:fg2q9iqgpab5sd",
       "grafana.app/saved-from-ui": "Grafana Cloud",
       "grafana.app/updatedBy": "user:fg2q9iqgpab5sd",
-      "grafana.app/updatedTimestamp": "2026-10-30T19:08:55Z"
+      "grafana.app/updatedTimestamp": "2026-10-30T19:20:13Z"
     }
   },
   "spec": {
