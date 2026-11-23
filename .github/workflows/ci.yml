@@ -181,3 +181,11 @@ jobs:
       - name: Deploy new container
         run: |
           aws ecs update-service --cluster jwt-pizza-service --service jwt-pizza-service --force-new-deployment
+
+      - name: Annotate deployment in Grafana
+        run: |
+          # -f so a revoked token fails the step instead of silently passing
+          curl -sf -X POST https://narrowpigeon3496.grafana.net/api/annotations \
+          -H "Authorization: Bearer ${{ secrets.GRAFANA_ACCESS_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          -d '{"dashboardUID":"chmsjrb", "panelId":1, "tags":["backend","production"], "text":"Version '"$version"' deployed" }'
